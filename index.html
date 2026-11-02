@@ -6,6 +6,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Van市麻将</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#b23a2a">
 <style>
   :root { --paper: #ece3cf; --ink: #221d18; --ink-2: #5b5145; --vermilion: #b23a2a; }
   html, body { margin: 0; height: 100%; background: var(--paper); color: var(--ink); }
@@ -21,11 +25,28 @@
   <h1>Van市麻将</h1>
   <p id="say">正在找房间…</p>
   <a class="go" id="go" hidden>进入房间</a>
+  <p><a class="go" id="install" href="#" hidden>安装到桌面</a></p>
 </main>
 <script>
 (async () => {
   const say = document.getElementById('say');
   const go = document.getElementById('go');
+  // ?app stays on this page so the browser can install it as an app (the installed app opens ./ and goes straight in)
+  const params = new URLSearchParams(location.search);
+  if (params.has('app')) {
+    const inst = document.getElementById('install');
+    say.textContent = '用 Chrome 或 Edge 打开这一页，点下面的按钮（或地址栏右边的安装图标）装成桌面应用。手机上用浏览器菜单里的「添加到主屏幕」。';
+    go.href = './';
+    go.textContent = '直接进入';
+    go.hidden = false;
+    addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      inst.hidden = false;
+      inst.onclick = ev => { ev.preventDefault(); e.prompt(); };
+    });
+    addEventListener('appinstalled', () => { inst.hidden = true; say.textContent = '装好了，以后从桌面图标打开就行。'; });
+    return;
+  }
   // owner.github.io/repo/ → owner/repo
   const owner = location.hostname.split('.')[0];
   const repo = location.pathname.split('/').filter(Boolean)[0] || `${owner}.github.io`;
