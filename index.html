@@ -63,6 +63,16 @@
   if (!link) try { link = await read(`url.json?t=${Date.now()}`); } catch {}
   if (!link) { say.textContent = '房主现在没开房间，晚点再来。'; return; }
   const target = link.url.replace(/\/?$/, '/') + location.search + location.hash;
+  // the installed app keeps the room inside this page: leaving github.io would give the window a URL bar
+  if (matchMedia('(display-mode: standalone), (display-mode: minimal-ui), (display-mode: window-controls-overlay)').matches) {
+    const f = document.createElement('iframe');
+    f.src = target;
+    f.allow = 'microphone; autoplay; fullscreen; clipboard-read; clipboard-write; screen-wake-lock';
+    f.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;background:var(--paper)';
+    f.onload = () => f.focus();
+    document.body.append(f);
+    return;
+  }
   go.href = target;
   go.hidden = false;
   say.textContent = '正在进入房间…';
